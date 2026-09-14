@@ -2,12 +2,11 @@ package com.eventflow.orderservice.service;
 
 import com.eventflow.orderservice.event.InventoryReservedEvent;
 import com.eventflow.orderservice.event.PaymentProcessedEvent;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.annotation.RetryableTopic;
-import org.springframework.kafka.retrytopic.TopicSuffixingStrategy;
-import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,28 +15,28 @@ import org.springframework.stereotype.Component;
 public class OrderEventConsumer {
 
     private final OrderService orderService;
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    @RetryableTopic(
-            attempts = "3",
-            backoff = @Backoff(delay = 1000, multiplier = 2),
-            topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE,
-            dltTopicSuffix = "-dlt"
-    )
-    @KafkaListener(topics = "${kafka.topics.inventory-reserved}", groupId = "order-service-group")
-    public void handleInventoryReserved(InventoryReservedEvent event) {
-        log.info("Received InventoryReservedEvent for order: {}", event.getOrderId());
-        orderService.handleInventoryReserved(event);
+    @KafkaListener(topics = "${kafka.topics.inventory-reserved}", groupId = "order-service-group-v2")
+    public void handleInventoryReserved(String message) {
+        try {
+            InventoryReservedEvent event = objectMapper.readValue(message, InventoryReservedEvent.class);
+            log.info("Received InventoryReservedEvent — orderId: {}, success: {}", event.getOrderId(), event.isSuccess());
+            orderService.handleInventoryReserved(event);
+        } catch (Exception e) {
+            log.error("Failed to process InventoryReservedEvent: {}", e.getMessage());
+        }
     }
 
-    @RetryableTopic(
-            attempts = "3",
-            backoff = @Backoff(delay = 1000, multiplier = 2),
-            topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE,
-            dltTopicSuffix = "-dlt"
-    )
-    @KafkaListener(topics = "${kafka.topics.payment-processed}", groupId = "order-service-group")
-    public void handlePaymentProcessed(PaymentProcessedEvent event) {
-        log.info("Received PaymentProcessedEvent for order: {}", event.getOrderId());
-        orderService.handlePaymentProcessed(event);
+    @KafkaListener(topics = "${kafka.topics.payment-processed}", groupId = "order-service-group-v2")
+    public void handlePaymentProcessed(String message) {
+        try {
+            PaymentProcessedEvent event = objectMapper.readValue(message, PaymentProcessedEvent.class);
+            log.info("Received PaymentProcessedEvent — orderId: {}, success: {}", event.getOrderId(), event.isSuccess());
+            orderService.handlePaymentProcessed(event);
+        } catch (Exception e) {
+            log.error("Failed to process PaymentProcessedEvent: {}", e.getMessage());
+        }
     }
 }

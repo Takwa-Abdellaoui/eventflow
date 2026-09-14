@@ -24,7 +24,7 @@ public class Payment {
     @Column(nullable = false, unique = true)
     private UUID orderId;
 
-    @Column(nullable = false)
+    @Column
     private String customerId;
 
     @Column(nullable = false, precision = 10, scale = 2)

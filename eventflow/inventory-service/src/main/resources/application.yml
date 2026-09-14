@@ -6,7 +6,7 @@ spring:
     name: inventory-service
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:5433/inventory_db
+    url: jdbc:postgresql://${DB_HOST:localhost}:5432/inventory_db
     username: ${DB_USER:eventflow}
     password: ${DB_PASSWORD:eventflow}
 
@@ -17,7 +17,6 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
@@ -26,12 +25,14 @@ spring:
       properties:
         spring.json.add.type.headers: false
     consumer:
-      group-id: inventory-service-group
+      group-id: inventory-service-group-v3
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
       properties:
-        spring.json.trusted.packages: "com.eventflow.*"
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: "*"
+        spring.json.value.default.type: com.eventflow.inventoryservice.event.OrderCreatedEvent
 
 kafka:
   topics:

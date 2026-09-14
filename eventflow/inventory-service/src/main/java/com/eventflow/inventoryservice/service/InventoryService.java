@@ -63,8 +63,10 @@ public class InventoryService {
     private void publishReservationResult(OrderCreatedEvent event, boolean success, String reason) {
         InventoryReservedEvent result = InventoryReservedEvent.builder()
                 .orderId(event.getOrderId())
+                .customerId(event.getCustomerId())
                 .productId(event.getProductId())
                 .quantity(event.getQuantity())
+                .totalAmount(event.getTotalAmount())
                 .success(success)
                 .reason(reason)
                 .build();
