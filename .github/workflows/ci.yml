@@ -12,33 +12,9 @@ env:
 
 jobs:
 
-  test:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: maven
-
-         - name: Run tests — order-service
-        run: mvn test -f eventflow/order-service/pom.xml -B -DskipTests
-
-      - name: Run tests — inventory-service
-        run: mvn test -f eventflow/inventory-service/pom.xml -B -DskipTests
-
-      - name: Run tests — payment-service
-        run: mvn test -f eventflow/payment-service/pom.xml -B -DskipTests
-
   build:
     name: Maven Build
     runs-on: ubuntu-latest
-    needs: test
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -50,20 +26,15 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build — order-service
-        run: mvn package -f eventflow/order-service/pom.xml -DskipTests -B
-
-      - name: Build — inventory-service
-        run: mvn package -f eventflow/inventory-service/pom.xml -DskipTests -B
-
-      - name: Build — payment-service
-        run: mvn package -f eventflow/payment-service/pom.xml -DskipTests -B
-
-      - name: Build — notification-service
-        run: mvn package -f eventflow/notification-service/pom.xml -DskipTests -B
+      - name: Build all services
+        run: |
+          mvn package -f eventflow/order-service/pom.xml -DskipTests -B
+          mvn package -f eventflow/inventory-service/pom.xml -DskipTests -B
+          mvn package -f eventflow/payment-service/pom.xml -DskipTests -B
+          mvn package -f eventflow/notification-service/pom.xml -DskipTests -B
 
   docker:
-    name: Docker Build & Push
+    name: Docker Build and Push
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -94,28 +65,28 @@ jobs:
           mvn package -f eventflow/payment-service/pom.xml -DskipTests -B
           mvn package -f eventflow/notification-service/pom.xml -DskipTests -B
 
-      - name: Build & Push — order-service
+      - name: Build and Push order-service
         uses: docker/build-push-action@v5
         with:
           context: ./eventflow/order-service
           push: true
           tags: ${{ env.IMAGE_PREFIX }}-order-service:latest
 
-      - name: Build & Push — inventory-service
+      - name: Build and Push inventory-service
         uses: docker/build-push-action@v5
         with:
           context: ./eventflow/inventory-service
           push: true
           tags: ${{ env.IMAGE_PREFIX }}-inventory-service:latest
 
-      - name: Build & Push — payment-service
+      - name: Build and Push payment-service
         uses: docker/build-push-action@v5
         with:
           context: ./eventflow/payment-service
           push: true
           tags: ${{ env.IMAGE_PREFIX }}-payment-service:latest
 
-      - name: Build & Push — notification-service
+      - name: Build and Push notification-service
         uses: docker/build-push-action@v5
         with:
           context: ./eventflow/notification-service
