@@ -1,0 +1,42 @@
+# Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.snap
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# VS Code
+.vscode/
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+*.env
+
+# Docker
+docker-compose.override.yml
+
+# Spring Boot
+HELP.md

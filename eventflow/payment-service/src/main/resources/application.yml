@@ -1,0 +1,53 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: payment-service
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:5434/payments_db
+    username: ${DB_USER:eventflow}
+    password: ${DB_PASSWORD:eventflow}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: payment-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.eventflow.*"
+
+kafka:
+  topics:
+    inventory-reserved: inventory.reserved
+    payment-processed: payment.processed
+
+# Simulation de paiement (pas de vrai gateway)
+payment:
+  success-rate: 0.9  # 90% de succès pour le MVP
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  metrics:
+    export:
+      prometheus:
+        enabled: true

@@ -1,0 +1,271 @@
+version: '3.8'
+
+services:
+
+  # ─────────────────────────────────────────
+  # INFRASTRUCTURE
+  # ─────────────────────────────────────────
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: eventflow-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - eventflow-network
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo ruok | nc localhost 2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: eventflow-kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"
+      - "9997:9997"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_JMX_PORT: 9997
+      KAFKA_JMX_HOSTNAME: kafka
+    networks:
+      - eventflow-network
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: eventflow-kafka-ui
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: eventflow
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    networks:
+      - eventflow-network
+
+  # ─────────────────────────────────────────
+  # BASES DE DONNÉES
+  # ─────────────────────────────────────────
+
+  orders-db:
+    image: postgres:16-alpine
+    container_name: eventflow-orders-db
+    environment:
+      POSTGRES_DB: orders_db
+      POSTGRES_USER: eventflow
+      POSTGRES_PASSWORD: eventflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - orders-db-data:/var/lib/postgresql/data
+    networks:
+      - eventflow-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eventflow -d orders_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  inventory-db:
+    image: postgres:16-alpine
+    container_name: eventflow-inventory-db
+    environment:
+      POSTGRES_DB: inventory_db
+      POSTGRES_USER: eventflow
+      POSTGRES_PASSWORD: eventflow
+    ports:
+      - "5433:5432"
+    volumes:
+      - inventory-db-data:/var/lib/postgresql/data
+    networks:
+      - eventflow-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eventflow -d inventory_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  payments-db:
+    image: postgres:16-alpine
+    container_name: eventflow-payments-db
+    environment:
+      POSTGRES_DB: payments_db
+      POSTGRES_USER: eventflow
+      POSTGRES_PASSWORD: eventflow
+    ports:
+      - "5434:5432"
+    volumes:
+      - payments-db-data:/var/lib/postgresql/data
+    networks:
+      - eventflow-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eventflow -d payments_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────
+  # MICROSERVICES
+  # ─────────────────────────────────────────
+
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    container_name: eventflow-order-service
+    depends_on:
+      orders-db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      DB_HOST: orders-db
+      DB_USER: eventflow
+      DB_PASSWORD: eventflow
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    networks:
+      - eventflow-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  inventory-service:
+    build:
+      context: ./inventory-service
+      dockerfile: Dockerfile
+    container_name: eventflow-inventory-service
+    depends_on:
+      inventory-db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8082:8082"
+    environment:
+      DB_HOST: inventory-db
+      DB_USER: eventflow
+      DB_PASSWORD: eventflow
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    networks:
+      - eventflow-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: eventflow-payment-service
+    depends_on:
+      payments-db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8083:8083"
+    environment:
+      DB_HOST: payments-db
+      DB_USER: eventflow
+      DB_PASSWORD: eventflow
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    networks:
+      - eventflow-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: eventflow-notification-service
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8084:8084"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    networks:
+      - eventflow-network
+
+  # ─────────────────────────────────────────
+  # MONITORING
+  # ─────────────────────────────────────────
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: eventflow-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - eventflow-network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: eventflow-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: eventflow
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+    depends_on:
+      - prometheus
+    networks:
+      - eventflow-network
+
+# ─────────────────────────────────────────
+# RÉSEAUX & VOLUMES
+# ─────────────────────────────────────────
+
+networks:
+  eventflow-network:
+    driver: bridge
+
+volumes:
+  orders-db-data:
+  inventory-db-data:
+  payments-db-data:
+  grafana-data:
