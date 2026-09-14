@@ -31,13 +31,13 @@ jobs:
           cache: maven
 
       - name: Run tests — order-service
-        run: mvn test -f order-service/pom.xml -B
+        run: mvn test -f eventflow/order-service/pom.xml -B
 
       - name: Run tests — inventory-service
-        run: mvn test -f inventory-service/pom.xml -B
+        run: mvn test -f eventflow/inventory-service/pom.xml -B
 
       - name: Run tests — payment-service
-        run: mvn test -f payment-service/pom.xml -B
+        run: mvn test -f eventflow/payment-service/pom.xml -B
 
       - name: Upload test reports
         uses: actions/upload-artifact@v4
@@ -69,16 +69,16 @@ jobs:
           cache: maven
 
       - name: Build — order-service
-        run: mvn package -f order-service/pom.xml -DskipTests -B
+        run: mvn package -f eventflow/order-service/pom.xml -DskipTests -B
 
       - name: Build — inventory-service
-        run: mvn package -f inventory-service/pom.xml -DskipTests -B
+        run: mvn package -f eventflow/inventory-service/pom.xml -DskipTests -B
 
       - name: Build — payment-service
-        run: mvn package -f payment-service/pom.xml -DskipTests -B
+        run: mvn package -f eventflow/payment-service/pom.xml -DskipTests -B
 
       - name: Build — notification-service
-        run: mvn package -f notification-service/pom.xml -DskipTests -B
+        run: mvn package -f eventflow/notification-service/pom.xml -DskipTests -B
 
   # ─────────────────────────────────────────
   # JOB 3 : Docker Build + Push (main only)
@@ -111,15 +111,15 @@ jobs:
 
       - name: Build Maven artifacts
         run: |
-          mvn package -f order-service/pom.xml -DskipTests -B
-          mvn package -f inventory-service/pom.xml -DskipTests -B
-          mvn package -f payment-service/pom.xml -DskipTests -B
-          mvn package -f notification-service/pom.xml -DskipTests -B
+          mvn package -f eventflow/order-service/pom.xml -DskipTests -B
+          mvn package -f eventflow/inventory-service/pom.xml -DskipTests -B
+          mvn package -f eventflow/payment-service/pom.xml -DskipTests -B
+          mvn package -f eventflow/notification-service/pom.xml -DskipTests -B
 
       - name: Build & Push — order-service
         uses: docker/build-push-action@v5
         with:
-          context: ./order-service
+          context: eventflow/order-service
           push: true
           tags: ${{ env.IMAGE_PREFIX }}-order-service:latest,${{ env.IMAGE_PREFIX }}-order-service:${{ github.sha }}
           cache-from: type=gha
@@ -128,7 +128,7 @@ jobs:
       - name: Build & Push — inventory-service
         uses: docker/build-push-action@v5
         with:
-          context: ./inventory-service
+          context: eventflow/inventory-service
           push: true
           tags: ${{ env.IMAGE_PREFIX }}-inventory-service:latest,${{ env.IMAGE_PREFIX }}-inventory-service:${{ github.sha }}
           cache-from: type=gha
@@ -137,7 +137,7 @@ jobs:
       - name: Build & Push — payment-service
         uses: docker/build-push-action@v5
         with:
-          context: ./payment-service
+          context: eventflow/payment-service
           push: true
           tags: ${{ env.IMAGE_PREFIX }}-payment-service:latest,${{ env.IMAGE_PREFIX }}-payment-service:${{ github.sha }}
           cache-from: type=gha
@@ -146,7 +146,7 @@ jobs:
       - name: Build & Push — notification-service
         uses: docker/build-push-action@v5
         with:
-          context: ./notification-service
+          context: eventflow/notification-service
           push: true
           tags: ${{ env.IMAGE_PREFIX }}-notification-service:latest,${{ env.IMAGE_PREFIX }}-notification-service:${{ github.sha }}
           cache-from: type=gha
