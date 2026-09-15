@@ -163,20 +163,3 @@ Le pipeline GitHub Actions se déclenche à chaque push sur `main` :
 ```
 push → Test → Build → Docker Build → DockerHub Push
 ```
-
-### Configurer les secrets GitHub
-
-```
-Settings → Secrets → Actions → New repository secret
-
-DOCKERHUB_USERNAME  →  votre username DockerHub
-DOCKERHUB_TOKEN     →  Account Settings → Security → Access Token
-```
-
-## Auteur
-
-**Yasmine** — [GitHub](https://github.com/YOUR_USERNAME)
-
----
-
-*Projet réalisé pour approfondir les compétences DevOps : microservices, event-driven architecture, containerisation et CI/CD.*
