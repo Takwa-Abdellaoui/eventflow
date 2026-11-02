@@ -188,6 +188,27 @@ services:
     environment:
       <<: *java-env
 
+  # ── Front Angular (Nginx) : seul point d'entrée public, port 80 ──
+  frontend:
+    image: takwaabdellaoui/eventflow-frontend:${TAG:-latest}
+    container_name: eventflow-frontend
+    restart: unless-stopped
+    mem_limit: 64m
+    depends_on:
+      order-service:
+        condition: service_healthy
+      inventory-service:
+        condition: service_healthy
+    ports:
+      - "80:80"
+    networks:
+      - eventflow-network
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 networks:
   eventflow-network:
     driver: bridge

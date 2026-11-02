@@ -6,8 +6,10 @@ import { Order, OrderRequest, Product } from '../models/order.model';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
-  private orderApi = 'http://localhost:8081/api/v1/orders';
-  private inventoryApi = 'http://localhost:8082/api/v1/inventory';
+  // URLs relatives : en production Nginx redirige vers les services,
+  // en développement (ng serve) c'est src/proxy.conf.json qui s'en charge.
+  private orderApi = '/api/v1/orders';
+  private inventoryApi = '/api/v1/inventory';
 
   constructor(private http: HttpClient) {}
 
