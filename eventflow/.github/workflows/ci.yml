@@ -151,6 +151,12 @@ jobs:
           tags: ${{ env.IMAGE_PREFIX }}-notification-service:latest,${{ env.IMAGE_PREFIX }}-notification-service:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+        - name: Build and Push frontend
+          uses: docker/build-push-action@v5
+          with:
+            context: ./eventflow/frontend
+            push: true
+            tags: ${{ env.IMAGE_PREFIX }}-frontend:latest  
 
       - name: Pipeline summary
         run: |
