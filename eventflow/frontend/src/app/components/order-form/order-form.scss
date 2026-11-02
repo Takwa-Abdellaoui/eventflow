@@ -1,0 +1,88 @@
+.form-card {
+  background: #161b27;
+  border: 1px solid #1e2a3a;
+  border-radius: 12px;
+  padding: 24px;
+
+  h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #1e2a3a;
+  }
+
+  .field {
+    margin-bottom: 16px;
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    input, select {
+      width: 100%;
+      background: #0f1117;
+      border: 1px solid #1e2a3a;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #e2e8f0;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+
+      &:focus { border-color: #60a5fa; }
+    }
+  }
+
+  .total-field {
+    .total-value {
+      display: block;
+      font-size: 24px;
+      font-weight: 700;
+      color: #4ade80;
+    }
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 8px;
+
+    &:hover:not(:disabled) { background: #1d4ed8; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+
+  .success-msg {
+    margin-top: 12px;
+    padding: 10px;
+    background: #14532d;
+    border-radius: 8px;
+    color: #4ade80;
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .error-msg {
+    margin-top: 12px;
+    padding: 10px;
+    background: #7f1d1d;
+    border-radius: 8px;
+    color: #f87171;
+    font-size: 13px;
+    text-align: center;
+  }
+}

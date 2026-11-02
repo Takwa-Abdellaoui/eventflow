@@ -1,0 +1,40 @@
+<div class="event-flow">
+  <div class="flow-header">
+    <h2>Flux Kafka</h2>
+    <span class="live-badge">● LIVE</span>
+  </div>
+
+  <div class="flow-steps">
+    <div class="step">
+      <div class="step-icon">📤</div>
+      <div class="step-label">order.created</div>
+      <div class="step-arrow">→</div>
+    </div>
+    <div class="step">
+      <div class="step-icon">📦</div>
+      <div class="step-label">inventory.reserved</div>
+      <div class="step-arrow">→</div>
+    </div>
+    <div class="step">
+      <div class="step-icon">💳</div>
+      <div class="step-label">payment.processed</div>
+      <div class="step-arrow">→</div>
+    </div>
+    <div class="step last">
+      <div class="step-icon">✅</div>
+      <div class="step-label">CONFIRMED</div>
+    </div>
+  </div>
+
+  <div class="events-log">
+    <div class="event-item" *ngFor="let e of events">
+      <span class="event-time">{{ e.time }}</span>
+      <span class="event-icon">{{ e.icon }}</span>
+      <span class="event-order">#{{ e.orderId }}</span>
+      <span class="event-name" [style.color]="e.color">{{ e.event }}</span>
+    </div>
+    <div class="empty-log" *ngIf="events.length === 0">
+      En attente d'événements...
+    </div>
+  </div>
+</div>

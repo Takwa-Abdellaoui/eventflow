@@ -1,0 +1,30 @@
+<div class="form-card">
+  <h2>Nouvelle commande</h2>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="field">
+      <label>Client</label>
+      <input formControlName="customerId" placeholder="CUST-001" />
+    </div>
+    <div class="field">
+      <label>Produit</label>
+      <select formControlName="productId">
+        <option *ngFor="let p of products" [value]="p.id">
+          {{ p.name }} — {{ p.price | currency:'EUR' }} (stock: {{ p.stockQuantity }})
+        </option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Quantité</label>
+      <input type="number" formControlName="quantity" min="1" />
+    </div>
+    <div class="field total-field">
+      <label>Total</label>
+      <span class="total-value">{{ form.get('totalAmount')?.value | currency:'EUR' }}</span>
+    </div>
+    <button type="submit" [disabled]="loading || form.invalid">
+      {{ loading ? 'Envoi...' : 'Passer la commande' }}
+    </button>
+    <div class="success-msg" *ngIf="success">✅ Commande créée — flux Kafka en cours...</div>
+    <div class="error-msg" *ngIf="error">❌ {{ error }}</div>
+  </form>
+</div>

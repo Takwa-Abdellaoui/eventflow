@@ -1,0 +1,38 @@
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+.stat-card {
+  background: #161b27;
+  border: 1px solid #1e2a3a;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.2s;
+
+  &:hover { transform: translateY(-2px); }
+
+  .stat-value {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  &.total { border-color: #334155; .stat-value { color: #e2e8f0; } }
+  &.pending { border-color: #92400e; .stat-value { color: #fbbf24; } }
+  &.reserved { border-color: #1e3a5f; .stat-value { color: #60a5fa; } }
+  &.confirmed { border-color: #14532d; .stat-value { color: #4ade80; } }
+  &.failed { border-color: #7f1d1d; .stat-value { color: #f87171; } }
+}

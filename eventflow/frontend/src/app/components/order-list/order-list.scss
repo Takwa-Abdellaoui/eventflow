@@ -1,0 +1,78 @@
+.order-list {
+  background: #161b27;
+  border: 1px solid #1e2a3a;
+  border-radius: 12px;
+  padding: 24px;
+
+  .list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #1e2a3a;
+
+    h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    .count {
+      font-size: 12px;
+      color: #64748b;
+    }
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+
+    th {
+      text-align: left;
+      padding: 10px 12px;
+      color: #64748b;
+      font-weight: 500;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #1e2a3a;
+    }
+
+    td {
+      padding: 12px;
+      color: #cbd5e1;
+      border-bottom: 1px solid #0f1117;
+
+      &.id { font-family: monospace; color: #475569; }
+    }
+
+    tr:hover td { background: #1a2234; }
+  }
+
+  .badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+
+    &.pending { background: #422006; color: #fbbf24; }
+    &.inventory-reserved { background: #0c2a4a; color: #60a5fa; }
+    &.confirmed { background: #052e16; color: #4ade80; }
+    &.failed { background: #450a0a; color: #f87171; }
+    &.cancelled { background: #1c1917; color: #78716c; }
+  }
+
+  .empty {
+    text-align: center;
+    padding: 40px;
+    color: #475569;
+    font-size: 14px;
+  }
+}

@@ -1,0 +1,39 @@
+<div class="order-list">
+  <div class="list-header">
+    <h2>Commandes en temps réel</h2>
+    <span class="count">{{ orders.length }} commande(s)</span>
+  </div>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Client</th>
+          <th>Produit</th>
+          <th>Qté</th>
+          <th>Montant</th>
+          <th>Statut</th>
+          <th>Heure</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of orders">
+          <td class="id">{{ order.id | slice:0:8 }}...</td>
+          <td>{{ order.customerId }}</td>
+          <td>{{ order.productId }}</td>
+          <td>{{ order.quantity }}</td>
+          <td>{{ order.totalAmount | currency:'EUR' }}</td>
+          <td>
+            <span [class]="'badge ' + statusClass(order.status)">
+              {{ statusLabel(order.status) }}
+            </span>
+          </td>
+          <td>{{ order.createdAt | date:'HH:mm:ss' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="empty" *ngIf="orders.length === 0">
+      Aucune commande — créez-en une depuis le formulaire !
+    </div>
+  </div>
+</div>
