@@ -93,6 +93,13 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_PREFIX }}-notification-service:latest
 
+      - name: Build and Push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./eventflow/frontend
+          push: true
+          tags: ${{ env.IMAGE_PREFIX }}-frontend:latest
+
   deploy:
     name: Deploy to AWS EC2
     runs-on: ubuntu-latest
@@ -115,7 +122,7 @@ jobs:
           target: /home/ubuntu/eventflow
           strip_components: 1
 
-      - name: Déployer sur le serveur
+      - name: Deployer sur le serveur
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -138,7 +145,7 @@ jobs:
               sleep 10
             done
 
-            echo "Échec du health check"
+            echo "Echec du health check"
             docker compose -f docker-compose.prod.yml ps
             docker compose -f docker-compose.prod.yml logs --tail=50 order-service
             exit 1
